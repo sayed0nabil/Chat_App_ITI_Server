@@ -1,29 +1,35 @@
 package org.example.Controller;
 
 import org.example.Interfaces.IChatService;
-import org.example.model.Message;
-import org.example.model.Notification;
-import org.example.model.User;
-import org.example.model.UserStatus;
+import org.example.model.*;
 
 import java.rmi.RemoteException;
 import java.rmi.server.UnicastRemoteObject;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ChatService extends UnicastRemoteObject implements IChatService {
     static List<User> onlineUsers = new ArrayList<>();
+    UserDao userDao;
+    private User user;
     protected ChatService() throws RemoteException {
+        try {
+            userDao = new UserDaoImpl();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public List<User> getFriendList(User user) {
-        return null;
+        return userDao.getFriendList(user);
     }
 
     @Override
     public void changeStatus(UserStatus userStatus) {
-
+        user.setStatus(userStatus);
+        userDao.updateUser(user.getId(), user);
     }
 
     @Override
@@ -38,14 +44,14 @@ public class ChatService extends UnicastRemoteObject implements IChatService {
 
     @Override
     public void register(User user) {
-        System.out.println("Get Registered");
-//        onlineUsers.add(user);
+        this.user = user;
+        onlineUsers.add(this.user);
     }
 
-//    @Override
-//    public void unRegister(User user) {
-////        onlineUsers.remove(user);
-//    }
+    @Override
+    public void unRegister(User user) {
+        onlineUsers.remove(user);
+    }
 
     @Override
     public void addFriend() {

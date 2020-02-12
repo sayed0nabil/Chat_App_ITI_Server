@@ -13,4 +13,6 @@ public interface UserDao {
 
     boolean addUser(User user);
 
+    List<User> getFriendList(User user);
+
 }

@@ -3,6 +3,7 @@ package org.example.model;
 import org.example.DB.DBConnection;
 
 import javax.sql.RowSet;
+import javax.xml.transform.Result;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Date;
@@ -114,6 +115,25 @@ public class UserDaoImpl implements UserDao {
             }
         }
         return false;
+    }
+
+    @Override
+    public List<User> getFriendList(User user){
+        List<User> friends = new ArrayList<>();
+        try {
+            String sql = "select second_member from contacts where first_member = ? " +
+                    " union select first_member from contacts where second_number = ?";
+            preparedStatement = conn.prepareStatement(sql);
+            preparedStatement.setInt(1, user.getId());
+            preparedStatement.setInt(2, user.getId());
+            ResultSet resultSet =  preparedStatement.executeQuery();
+            while(resultSet.next()){
+                friends.add(getUser(resultSet.getInt(1)));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return friends;
     }
     private User extractUser(ResultSet resultSet){
         try{
